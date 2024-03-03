@@ -6,6 +6,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.slf4j.LoggerFactory
 import org.traderepublic.candlesticks.api.Server
+import org.traderepublic.candlesticks.services.implementations.InstrumentServiceImpl
+import org.traderepublic.candlesticks.services.implementations.QuoteServiceImpl
 import org.traderepublic.candlesticks.streams.InstrumentStream
 import org.traderepublic.candlesticks.streams.QuoteStream
 
@@ -17,19 +19,17 @@ fun main() {
     val server = Server()
     val instrumentStream = InstrumentStream()
     val quoteStream = QuoteStream()
+    val instrumentService = InstrumentServiceImpl()
+    val quoteService = QuoteServiceImpl()
 
     instrumentStream.connect { event ->
-        // TODO - implement
-        processIntrumentEvent(event)
-
         logger.info("Instrument: {}", event)
+        instrumentService.processInstrumentEvent(event)
     }
 
     quoteStream.connect { event ->
-        // TODO - implement
-
-
         logger.info("Quote: {}", event)
+        quoteService.processQuoteEvent(event)
     }
 
     server.start()

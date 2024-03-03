@@ -8,15 +8,28 @@ import org.traderepublic.candlesticks.repositories.CandlestickRepository
 
 class CandlestickRepositoryImpl : CandlestickRepository {
 
-    private val candlestickStorage: Map<String, List<Candlestick>> = mutableMapOf()
-
-    private val instrumentStorage: MutableList<Instrument> = mutableListOf()
-
+    private val candlestickStorage: MutableMap<String, LinkedList<Candlestick>> = mutableMapOf()
     override fun saveCandlestick(isin: ISIN, candlestick: Candlestick) {
-        candlestickStorage.get()
+        val list = if(candlestickStorage[isin] == null) LinkedList<Candlestick>()
+                    else candlestickStorage[isin]
+        list!!.add(candlestick)
+        candlestickStorage[isin] = list
     }
 
-    override fun saveInstrument(instrument: Instrument) {
-        instrumentStorage.add(instrument)
+    override fun getCandlesticksForISIN(isin: ISIN): LinkedList<Candlestick> {
+        val list = candlestickStorage[isin] ?: LinkedList<Candlestick>()
+        return list;
     }
+
+    override fun getCandlesticksForISIN2(isin: ISIN): LinkedList<Candlestick> {
+        val list = candlestickStorage[isin] ?: LinkedList<Candlestick>()
+        return list;
+    }
+
+    override fun updateCandleStick(isin: String,candlestick: Candlestick) {
+        // delete old and add new
+       val deleteCandlestick = candlestickStorage[isin]?.pop()
+        candlestickStorage[isin]?.push(candlestick)
+    }
+
 }

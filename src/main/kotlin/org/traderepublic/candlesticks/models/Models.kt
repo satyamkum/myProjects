@@ -17,10 +17,6 @@ typealias ISIN = String
 data class Quote(val isin: ISIN, val price: Price)
 typealias Price = Double
 
-interface CandlestickManager {
-    fun getCandlesticks(isin: String): List<Candlestick>
-}
-
 data class Candlestick(
     val openTimestamp: Instant,
     var closeTimestamp: Instant,
