@@ -21,6 +21,9 @@ class MainTest {
   @Test
   fun `dummy two test`() {
     quoteService.processQuoteEvent(QuoteEvent(Quote("X8321062V15",1714.8814)))
+    quoteService.processQuoteEvent(QuoteEvent(Quote("X8321062V15",1715.8814)))
+    quoteService.processQuoteEvent(QuoteEvent(Quote("X8321062V15",1716.8814)))
+    quoteService.processQuoteEvent(QuoteEvent(Quote("X8321062V15",1717.8814)))
     assertEquals(4, 2+2)
   }
   
