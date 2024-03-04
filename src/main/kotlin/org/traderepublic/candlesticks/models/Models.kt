@@ -1,5 +1,6 @@
 package org.traderepublic.candlesticks.models
 
+import com.fasterxml.jackson.annotation.JsonFormat
 import java.time.Instant
 
 data class InstrumentEvent(val type: Type, val data: Instrument) {
@@ -18,7 +19,9 @@ data class Quote(val isin: ISIN, val price: Price)
 typealias Price = Double
 
 data class Candlestick(
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "UTC")
     val openTimestamp: Instant,
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "UTC")
     var closeTimestamp: Instant,
     val openPrice: Price,
     var highPrice: Price,

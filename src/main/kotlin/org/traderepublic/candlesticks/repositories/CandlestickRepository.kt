@@ -10,7 +10,4 @@ interface CandlestickRepository {
 
     fun getCandlesticksForISIN(isin: ISIN): LinkedList<Candlestick>
 
-    fun getCandlesticksForISIN2(isin: ISIN): LinkedList<Candlestick>
-
-    fun updateCandleStick(isin: String, candlestick: Candlestick)
 }

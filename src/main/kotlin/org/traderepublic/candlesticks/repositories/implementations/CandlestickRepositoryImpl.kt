@@ -10,9 +10,10 @@ class CandlestickRepositoryImpl : CandlestickRepository {
 
     override fun saveCandlestick(isin: ISIN, candlestick: Candlestick) {
         val list = if (!candlestickStorage.containsKey(isin)) LinkedList<Candlestick>()
-        else candlestickStorage[isin]
+                    else candlestickStorage[isin]
 
-        if(list?.size!! >= 30) {
+        //If list size is equal to configured size then remove old entry
+        if(list!!.size == CANDLESTICK_LIST_SIZE) {
             list.removeFirst()
         }
         list.add(candlestick)
@@ -20,21 +21,13 @@ class CandlestickRepositoryImpl : CandlestickRepository {
     }
 
     override fun getCandlesticksForISIN(isin: ISIN): LinkedList<Candlestick> {
-        return candlestickStorage[isin] ?: LinkedList();
-    }
-
-    override fun getCandlesticksForISIN2(isin: ISIN): LinkedList<Candlestick> {
-        return candlestickStorage[isin] ?: LinkedList();
-    }
-
-    override fun updateCandleStick(isin: String, candlestick: Candlestick) {
-        // delete old and add new
-        val entry = candlestickStorage[isin]?.removeLast()
-        candlestickStorage[isin]?.push(candlestick)
+        return candlestickStorage[isin] ?: LinkedList()
     }
 
     companion object {
         private lateinit var candlestickStorage: ConcurrentHashMap<String, LinkedList<Candlestick>>
+        //TODO Derive this value from config
+        private const val CANDLESTICK_LIST_SIZE: Int = 30
 
         @JvmStatic
         fun getCandlestickStorage(): MutableMap<String, LinkedList<Candlestick>> {

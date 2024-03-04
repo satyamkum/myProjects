@@ -10,6 +10,7 @@ import org.http4k.server.Http4kServer
 import org.http4k.server.Netty
 import org.http4k.server.asServer
 import org.traderepublic.candlesticks.jackson
+import org.traderepublic.candlesticks.repositories.implementations.CandlestickRepositoryImpl
 import org.traderepublic.candlesticks.services.CandlestickService
 import org.traderepublic.candlesticks.services.implementations.CandlestickServiceImpl
 
@@ -17,8 +18,7 @@ class Server(
     port: Int = 9000,
 ) {
 
-    // TODO - invoke your implementation here
-    private var service: CandlestickService = CandlestickServiceImpl()
+    private var candlestickService: CandlestickService = CandlestickServiceImpl(CandlestickRepositoryImpl())
 
     private val routes = routes(
         "candlesticks" bind Method.GET to { getCandlesticks(it) },
@@ -34,9 +34,11 @@ class Server(
         val isin = req.query("isin")
             ?: return Response(Status.BAD_REQUEST).body("{'reason': 'missing_isin'}")
 
-        val resp = service.getCandlesticks(isin)
-        val body = jackson.writeValueAsBytes(resp)
-
-        return Response(Status.OK).body(body.inputStream())
+        val candlesticks = candlestickService.getCandlesticks(isin)
+        return if (candlesticks.isEmpty()) {
+            Response(Status.NOT_FOUND).body("{'reason': 'no_data_for_isin'}")
+        } else {
+            Response(Status.OK).body( jackson.writeValueAsBytes(candlesticks).inputStream())
+        }
     }
 }
