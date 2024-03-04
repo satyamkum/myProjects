@@ -33,12 +33,9 @@ class CandlestickServiceImpl(private val candlestickRepository: CandlestickRepos
                     candlestickRepository.saveCandlestick(
                         event.data.isin, lastUpdatedCandlestick.copy(
                             openTimestamp = lastUpdatedCandlestick.openTimestamp.plusSeconds(
-                                counter.times(60)
-                                    .toLong()
-                            ),
-                            closeTimestamp = lastUpdatedCandlestick.closeTimestamp.plusSeconds(
-                                counter++.times(60)
-                                    .toLong()
+                                counter.times(60).toLong()
+                            ), closeTimestamp = lastUpdatedCandlestick.closeTimestamp.plusSeconds(
+                                counter++.times(60).toLong()
                             )
                         )
                     )
@@ -52,8 +49,6 @@ class CandlestickServiceImpl(private val candlestickRepository: CandlestickRepos
 
     override fun getCandlesticks(isin: String): List<Candlestick> {
 
-        //TODO: Add validation to input isin is present in valid instrument list and return proper response message
-
         val candlesticks = candlestickRepository.getCandlesticksForISIN(isin)
 
         if (candlesticks.isNotEmpty()) {
@@ -65,11 +60,14 @@ class CandlestickServiceImpl(private val candlestickRepository: CandlestickRepos
              *  (can be replaced with data storage)
              *  Assumption: We are returning history of last 30 minutes including current minute.
              */
-            if (lastUpdatedCandlestick.openTimestamp == currentTimestamp)
-                return candlesticks
+            if (lastUpdatedCandlestick.openTimestamp == currentTimestamp) return candlesticks
+            /**
+             * Assumption: If no price change happened from last 30 minutes then return empty list.
+             */
+            else if (lastUpdatedCandlestick.openTimestamp < currentTimestamp.minusSeconds(30 * 60)) return emptyList()
             else {
                 /**
-                 * Assumption: There can be a get call for isin which price is not updated since few minutes.
+                 * Assumption: There can be a get call for isin which price is not updated since last few minutes.
                  * We are copying last updated candlestick data for that time interval.
                  */
                 val intervals = checkInterval(lastUpdatedCandlestick.openTimestamp, currentTimestamp)
@@ -80,12 +78,9 @@ class CandlestickServiceImpl(private val candlestickRepository: CandlestickRepos
                     tempCandlesticks.add(
                         lastUpdatedCandlestick.copy(
                             openTimestamp = lastUpdatedCandlestick.openTimestamp.plusSeconds(
-                                counter.times(60)
-                                    .toLong()
-                            ),
-                            closeTimestamp = lastUpdatedCandlestick.closeTimestamp.plusSeconds(
-                                counter++.times(60)
-                                    .toLong()
+                                counter.times(60).toLong()
+                            ), closeTimestamp = lastUpdatedCandlestick.closeTimestamp.plusSeconds(
+                                counter++.times(60).toLong()
                             )
                         )
                     )
@@ -93,6 +88,8 @@ class CandlestickServiceImpl(private val candlestickRepository: CandlestickRepos
                 val result = LinkedList<Candlestick>()
                 if (tempCandlesticks.isNotEmpty() && candlesticks.size - tempCandlesticks.size > 0) {
                     result.addAll(candlesticks.subList(tempCandlesticks.size - 1, candlesticks.size))
+                }else{
+                    result.addAll(candlesticks)
                 }
                 result.addAll(tempCandlesticks)
                 return result
@@ -105,18 +102,14 @@ class CandlestickServiceImpl(private val candlestickRepository: CandlestickRepos
         val price = event.data.price
         return Candlestick(
             Instant.now().truncatedTo(ChronoUnit.MINUTES), // add start of the minute
-            Instant.now().truncatedTo(ChronoUnit.MINUTES).plusSeconds(60),
-            price,
-            price,
-            price,
-            price
+            Instant.now().truncatedTo(ChronoUnit.MINUTES).plusSeconds(60), price, price, price, price
         )
     }
 
     private fun updateCandlestick(lastUpdatedCandlestick: Candlestick, candlestick: Candlestick) {
-        lastUpdatedCandlestick.highPrice = if (lastUpdatedCandlestick.highPrice > candlestick.highPrice)
-            lastUpdatedCandlestick.highPrice
-        else candlestick.highPrice
+        lastUpdatedCandlestick.highPrice =
+            if (lastUpdatedCandlestick.highPrice > candlestick.highPrice) lastUpdatedCandlestick.highPrice
+            else candlestick.highPrice
 
         lastUpdatedCandlestick.lowPrice =
             if (lastUpdatedCandlestick.lowPrice < candlestick.lowPrice) lastUpdatedCandlestick.lowPrice

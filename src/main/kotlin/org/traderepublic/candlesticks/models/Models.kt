@@ -19,9 +19,9 @@ data class Quote(val isin: ISIN, val price: Price)
 typealias Price = Double
 
 data class Candlestick(
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "UTC")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "CET")
     val openTimestamp: Instant,
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "UTC")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "CET")
     var closeTimestamp: Instant,
     val openPrice: Price,
     var highPrice: Price,

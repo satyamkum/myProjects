@@ -13,11 +13,9 @@ class InstrumentRepositoryImpl : InstrumentRepository {
         instrumentStorage.remove(instrument)
 
     }
-
     override fun getInstruments(): List<Instrument> {
         return instrumentStorage
     }
-
     companion object {
         private lateinit var instrumentStorage: MutableList<Instrument>
 
